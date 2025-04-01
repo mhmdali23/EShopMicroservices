@@ -1,0 +1,44 @@
+services:
+  catalogdb:
+    image: postgres:15-alpine
+    container_name: catalogdb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: catalogdb
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d catalogdb"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_catalog:/var/lib/postgresql/data
+    networks:
+      - app-network
+    
+  catalog.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__DefaultConnection:Host=catalogdb;Port=5432;Database=catalogdb;Username=postgres;Password=postgres; 
+    depends_on:
+      catalogdb:
+        condition: service_healthy
+    ports:
+      - "6000:8080"
+      - "6060:8081"
+    networks:
+      - app-network
+    volumes:
+      - type: bind
+        source: C:\Users\Aly\AppData\Roaming\Microsoft\UserSecrets
+        target: /root/.microsoft/usersecrets
+        read_only: true
+      - type: bind
+        source: C:\Users\Aly\AppData\Roaming\ASP.NET\Https
+        target: /root/.aspnet/https
+        read_only: true
