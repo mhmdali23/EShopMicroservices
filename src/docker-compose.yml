@@ -3,16 +3,34 @@ version: '3.8'
 services:
    catalogdb:
       image: postgres:15-alpine
+
+   basketdb:
+      image: postgres:15-alpine
+
+   distributedcache:
+      image: redis
+
+
+
    catalog.api:
       image: ${DOCKER_REGISTRY-}catalogapi
       build:
          context: .
          dockerfile: Services\Catalog\Catalog.Api\Dockerfile
+
+   basket.api:
+     image: ${DOCKER_REGISTRY-}basketapi
+     build:
+       context: .
+       dockerfile: Services/Basket/Basket.Api/Dockerfile
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
    postgres_catalog:
+   postgres_basket:
+
 
 
